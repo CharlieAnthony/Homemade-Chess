@@ -1,4 +1,5 @@
 import pygame
+from board import Board
 
 class Chess_Game:
 
@@ -22,13 +23,15 @@ class Chess_Game:
 
 	def start_game(self):
 
+		board = Board(self.screen)
+
 		while self.running:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.running = False
 
-			self.screen.fill((0, 0, 0))
+			# self.screen.fill((0, 0, 0))
 
 			pygame.display.flip()
 
