@@ -30,8 +30,13 @@ class Chess_Game:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.running = False
-
-			# self.screen.fill((0, 0, 0))
+				elif event.type == pygame.MOUSEBUTTONDOWN:
+					x, y = pygame.mouse.get_pos()
+					x, y = board.get_clicked_cell((x, y))
+					if board.selected_piece:
+						board.move_piece((x, y))
+					else:
+						board.get_available_moves((x, y))
 
 			pygame.display.flip()
 
