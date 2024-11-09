@@ -40,15 +40,11 @@ class Board:
 
 		if self.selected_piece:
 			for (x, y) in self.available_moves:
-				square_offset = self.square_size // 2
-				x_pos, y_pos = self.x_offset + square_offset + (x * self.square_size), self.y_offset + square_offset + (y * self.square_size)
-				# TODO: create dot image and display like a piece
-				# circle = pygame.draw.circle(
-				# 	surface=self.screen,
-				# 	color=(115, 115, 115),
-				# 	center=(x_pos, y_pos),
-				# 	radius=square_offset // 2.5,
-				# 	width=0)
+				x_pos, y_pos = self.x_offset + (x * self.square_size), self.y_offset + (y * self.square_size)
+				img = pygame.image.load("./assets/hint.png")
+				img_resized = pygame.transform.scale(img, (self.square_size, self.square_size))
+				self.screen.blit(img_resized, (x_pos, y_pos))
+
 		pygame.display.flip()
 
 	def get_clicked_cell(self, pos):
@@ -64,7 +60,16 @@ class Board:
 			self.selected_piece = None
 			return []
 		self.selected_piece = (x, y)
+		available_moves = []
+		if piece == "wp":
+			if not self.state[y-1][x]:
+				available_moves.append((x, y-1))
+				if y == 6 and not self.state[y-2][x]:
+					available_moves.append((x, y-2))
 
+		self.available_moves = available_moves
+		self.print_board()
+		return available_moves
 
 	def move_piece(self, new_pos):
 		x_old, y_old = self.selected_piece
@@ -76,6 +81,10 @@ class Board:
 			return
 		self.state[y_old][x_old] = ""
 		self.state[y_new][x_new] = piece
+		self.available_moves = []
 		self.print_board()
 		self.selected_piece = ""
 		self.is_white_turn = not self.is_white_turn
+
+	def is_check(self, is_white=True):
+		return False
