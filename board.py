@@ -11,7 +11,7 @@ class Board:
 						["", "", "", "", "", "", "", ""],
 						["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
 						["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]]
-		self.available_moves = [(3, 4), (4, 4), (3, 3), (4, 3)]
+		self.available_moves = {}
 		self.square_size = 40
 		self.screen = screen
 		self.x_offset, self.y_offset = 30, 30
@@ -39,9 +39,9 @@ class Board:
 					self.screen.blit(img_resized, (x_pos, y_pos))
 
 		if self.selected_piece:
-			for (x, y) in self.available_moves:
+			for (x, y) in self.available_moves.keys():
 				x_pos, y_pos = self.x_offset + (x * self.square_size), self.y_offset + (y * self.square_size)
-				img = pygame.image.load("./assets/hint.png")
+				img = pygame.image.load("./assets/hint_danger.png" if self.available_moves[(x, y)] else "./assets/hint.png")
 				img_resized = pygame.transform.scale(img, (self.square_size, self.square_size))
 				self.screen.blit(img_resized, (x_pos, y_pos))
 
@@ -56,35 +56,52 @@ class Board:
 	def get_available_moves(self, pos):
 		x, y = pos
 		piece = self.state[y][x]
-		if not piece:
+		if not piece or (piece and (piece[0] == "w") != self.is_white_turn):
 			self.selected_piece = None
-			return []
+			return {}
 		self.selected_piece = (x, y)
-		available_moves = []
+		available_moves = {}
 		if piece == "wp":
-			if not self.state[y-1][x]:
-				available_moves.append((x, y-1))
+			if y > 0 and not self.state[y-1][x]:
+				# available_moves.append((x, y-1))
+				available_moves[(x, y-1)] = False
 				if y == 6 and not self.state[y-2][x]:
-					available_moves.append((x, y-2))
-
+					# available_moves.append((x, y-2))
+					available_moves[(x, y-2)] = False
+			if y > 0:
+				if x > 0 and self.state[y-1][x-1] and self.state[y-1][x-1][0] == "b":
+					# available_moves.append((x-1, y-1))
+					available_moves[(x-1, y-1)] = True
+				if x < 7 and self.state[y-1][x+1] and self.state[y-1][x+1][0] == "b":
+					# available_moves.append((x+1, y-1))
+					available_moves[(x+1, y-1)] = True
+		if piece == "bp":
+			if y < 7 and not self.state[y+1][x]:
+				# available_moves.append((x, y+1))
+				available_moves[(x, y+1)] = False
+				if y == 1 and not self.state[y+2][x]:
+					# available_moves.append((x, y+2))
+					available_moves[(x, y+2)] = False
 		self.available_moves = available_moves
 		self.print_board()
 		return available_moves
 
 	def move_piece(self, new_pos):
-		x_old, y_old = self.selected_piece
-		x_new, y_new = new_pos
-		piece = self.state[y_old][x_old]
-		if (self.is_white_turn and piece[0] != 'w') or (not self.is_white_turn and piece[0] != 'b'):
-			print("not your turn!")
-			self.selected_piece = ""
-			return
-		self.state[y_old][x_old] = ""
-		self.state[y_new][x_new] = piece
-		self.available_moves = []
+		if new_pos in self.available_moves:
+			x_old, y_old = self.selected_piece
+			x_new, y_new = new_pos
+			piece = self.state[y_old][x_old]
+			if (self.is_white_turn and piece[0] != 'w') or (not self.is_white_turn and piece[0] != 'b'):
+				print("not your turn!")
+				self.selected_piece = ""
+				return
+			self.state[y_old][x_old] = ""
+			self.state[y_new][x_new] = piece
+			self.is_white_turn = not self.is_white_turn
+		self.available_moves = {}
 		self.print_board()
 		self.selected_piece = ""
-		self.is_white_turn = not self.is_white_turn
+
 
 	def is_check(self, is_white=True):
 		return False
