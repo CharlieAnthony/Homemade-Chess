@@ -37,6 +37,7 @@ class Chess_Game:
 						board.move_piece((x, y))
 					else:
 						board.get_available_moves((x, y))
+					board.print_board()
 
 			pygame.display.flip()
 

@@ -83,7 +83,6 @@ class Board:
 				if x < 7 and self.state[y+1][x+1] and self.state[y+1][x+1][0] == "w":
 					available_moves[(x+1, y+1)] = True
 		self.available_moves = available_moves
-		self.print_board()
 		return available_moves
 
 	def move_piece(self, new_pos):
@@ -99,9 +98,42 @@ class Board:
 			self.state[y_new][x_new] = piece
 			self.is_white_turn = not self.is_white_turn
 		self.available_moves = {}
-		self.print_board()
 		self.selected_piece = ""
+		print("is check?")
+		print("yes" if self.is_check(self.state, is_white=self.is_white_turn) else "no")
 
 
-	def is_check(self, is_white=True):
+	def is_check(self, state=[], is_white=True):
+		"""
+		Checks if player is in check
+		:param state: state of board
+		:param is_white: if white is in check
+		:return: Boolean
+		"""
+		state = state if state else self.state
+		colour = "w" if is_white else "b"
+		opp_king_pos = self.find_king_position(state, is_white)
+		for y, row in enumerate(state):
+			for x, piece in enumerate(row):
+				if piece and piece[0] == colour:
+					moves = self.get_available_moves((x, y))
+					if opp_king_pos in moves.keys():
+						return True
+		# TODO: Fix this
+		return False
+
+	def find_king_position(self, state, is_white):
+		"""
+		Finds the position of the king
+		:param state: board state
+		:param is_white: if looking for white king or not
+		:return: (x, y) pos on board of king
+		"""
+		piece = "wk" if is_white else "bk"
+		for y, row in enumerate(state):
+			for x, p in enumerate(row):
+				if p == piece:
+					return x, y
+		return None
+
 		return False
