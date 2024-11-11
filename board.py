@@ -54,6 +54,7 @@ class Board:
 		return x, y
 
 	def get_available_moves(self, pos):
+		# TODO: makes a state, passes to is_check() method, if no then adds to available_moves
 		x, y = pos
 		piece = self.state[y][x]
 		if not piece or (piece and (piece[0] == "w") != self.is_white_turn):
@@ -63,25 +64,24 @@ class Board:
 		available_moves = {}
 		if piece == "wp":
 			if y > 0 and not self.state[y-1][x]:
-				# available_moves.append((x, y-1))
 				available_moves[(x, y-1)] = False
 				if y == 6 and not self.state[y-2][x]:
-					# available_moves.append((x, y-2))
 					available_moves[(x, y-2)] = False
 			if y > 0:
 				if x > 0 and self.state[y-1][x-1] and self.state[y-1][x-1][0] == "b":
-					# available_moves.append((x-1, y-1))
 					available_moves[(x-1, y-1)] = True
 				if x < 7 and self.state[y-1][x+1] and self.state[y-1][x+1][0] == "b":
-					# available_moves.append((x+1, y-1))
 					available_moves[(x+1, y-1)] = True
 		if piece == "bp":
 			if y < 7 and not self.state[y+1][x]:
-				# available_moves.append((x, y+1))
 				available_moves[(x, y+1)] = False
 				if y == 1 and not self.state[y+2][x]:
-					# available_moves.append((x, y+2))
 					available_moves[(x, y+2)] = False
+			if y < 7:
+				if x > 0 and self.state[y+1][x-1] and self.state[y+1][x-1][0] == "w":
+					available_moves[(x-1, y+1)] = True
+				if x < 7 and self.state[y+1][x+1] and self.state[y+1][x+1][0] == "w":
+					available_moves[(x+1, y+1)] = True
 		self.available_moves = available_moves
 		self.print_board()
 		return available_moves
