@@ -99,8 +99,7 @@ class Board:
 			self.is_white_turn = not self.is_white_turn
 		self.available_moves = {}
 		self.selected_piece = ""
-		print("is check?")
-		print("yes" if self.is_check(self.state, is_white=self.is_white_turn) else "no")
+
 
 
 	def is_check(self, state=[], is_white=True):
@@ -110,16 +109,17 @@ class Board:
 		:param is_white: if white is in check
 		:return: Boolean
 		"""
+		selected = self.selected_piece
 		state = state if state else self.state
 		colour = "w" if is_white else "b"
-		opp_king_pos = self.find_king_position(state, is_white)
+		opp_king_pos = self.find_king_position(state, not is_white)
 		for y, row in enumerate(state):
 			for x, piece in enumerate(row):
 				if piece and piece[0] == colour:
 					moves = self.get_available_moves((x, y))
 					if opp_king_pos in moves.keys():
 						return True
-		# TODO: Fix this
+		self.selected_piece = selected
 		return False
 
 	def find_king_position(self, state, is_white):
