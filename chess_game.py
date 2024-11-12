@@ -31,10 +31,10 @@ class Chess_Game:
 				if event.type == pygame.QUIT:
 					self.running = False
 				elif event.type == pygame.MOUSEBUTTONDOWN:
-					x, y = pygame.mouse.get_pos()
-					x, y = board.get_clicked_cell((x, y))
-					if board.selected_piece:
-						board.move_piece((x, y))
+					x_pixel, y_pixel = pygame.mouse.get_pos()
+					x, y = board.get_clicked_cell((x_pixel, y_pixel))
+					if board.selected_piece and (x, y) in board.available_moves.keys():
+						board.move_piece(board.selected_piece, (x, y))
 					else:
 						board.get_available_moves((x, y))
 					board.print_board()

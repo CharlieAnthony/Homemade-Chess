@@ -62,6 +62,7 @@ class Board:
 			return {}
 		self.selected_piece = (x, y)
 		available_moves = {}
+# -=-=-=-=-=- WHITE PIECES -=-=-=-=-=-
 		if piece == "wp":
 			if y > 0 and not self.state[y-1][x]:
 				available_moves[(x, y-1)] = False
@@ -72,6 +73,7 @@ class Board:
 					available_moves[(x-1, y-1)] = True
 				if x < 7 and self.state[y-1][x+1] and self.state[y-1][x+1][0] == "b":
 					available_moves[(x+1, y-1)] = True
+# -=-=-=-=-=- BLACK PIECES -=-=-=-=-=-
 		if piece == "bp":
 			if y < 7 and not self.state[y+1][x]:
 				available_moves[(x, y+1)] = False
@@ -85,20 +87,23 @@ class Board:
 		self.available_moves = available_moves
 		return available_moves
 
-	def move_piece(self, new_pos):
-		if new_pos in self.available_moves:
-			x_old, y_old = self.selected_piece
-			x_new, y_new = new_pos
-			piece = self.state[y_old][x_old]
-			if (self.is_white_turn and piece[0] != 'w') or (not self.is_white_turn and piece[0] != 'b'):
-				print("not your turn!")
-				self.selected_piece = ""
-				return
-			self.state[y_old][x_old] = ""
-			self.state[y_new][x_new] = piece
-			self.is_white_turn = not self.is_white_turn
+	def move_piece(self, old_pos, new_pos):
+		if new_pos not in self.available_moves:
+			return
+		self.state = self.get_new_state(old_pos, new_pos)
+		# self.get_new_state(old_pos, new_pos)
+		self.is_white_turn = not self.is_white_turn
 		self.available_moves = {}
-		self.selected_piece = ""
+		self.selected_piece = None
+
+	def get_new_state(self, old_pos, new_pos):
+		state = [[x for x in row] for row in self.state]
+		x_old, y_old = old_pos
+		x_new, y_new = new_pos
+		piece = state[y_old][x_old]
+		state[y_old][x_old] = ""
+		state[y_new][x_new] = piece
+		return state
 
 
 
