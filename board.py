@@ -53,6 +53,77 @@ class Board:
 		y = (y_pos - self.y_offset) // self.square_size
 		return x, y
 
+	def get_raw_moves(self, pos):
+		x, y = pos
+		piece = self.state[y][x]
+		raw_moves = []
+		if not piece:
+			return []
+		# pawn moves
+		if piece[1] == "p":
+			direction = 1 if piece[0] == "b" else -1
+			if not self.is_valid((x, y + direction)):
+				return []
+			if self.is_empty((x, y + direction)):
+				raw_moves.append((x, y + direction))
+				if (y == 6 and piece[0] == "w") or (y == 1 and piece[0] == "b"):
+					if self.is_empty((x, y + (2 * direction))):
+						raw_moves.append((x, y + (2 * direction)))
+			for x_dir in [-1, 1]:
+				capture_pos = (x + x_dir, y + direction)
+				if self.is_valid(capture_pos) and not self.is_empty(capture_pos) and self.is_opposition_piece(capture_pos, piece[0]):
+					raw_moves.append(capture_pos)
+		# king moves
+		if piece[1] == "k":
+			king_moves = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
+			for move_x, move_y in king_moves:
+				new_pos = (x + move_x, y + move_y)
+				if self.is_valid(new_pos) and not self.is_opposition_piece(new_pos, piece[0]):
+					raw_moves.append(new_pos)
+		# knight moves
+		if piece[1] == "n":
+			knight_moves = [(2, 1), (2, -1), (1, 2), (1, -2), (-2, 1), (-2, -1), (-1, 2), (-1, -2)]
+			for move_x, move_y in knight_moves:
+				new_pos = (x + move_x, y + move_y)
+				if self.is_valid(new_pos) and not self.is_opposition_piece(new_pos, piece[0]):
+					raw_moves.append(new_pos)
+		# bishop/queen moves
+		# TODO: repeat code. Could be more concise
+		if piece[1] == "b" or piece[1] == "q":
+			dirs = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+			for d_x, d_y in dirs:
+				new_pos = (x, y)
+				while True:
+					old_x, old_y = new_pos
+					new_pos = (old_x + d_x, old_y + d_y)
+					if self.is_valid(new_pos):
+						if self.is_empty(new_pos):
+							raw_moves.append(new_pos)
+						else:
+							if self.is_opposition_piece(new_pos, piece[0]):
+								raw_moves.append(new_pos)
+							break
+					else:
+						break
+		# rook/queen moves
+		if piece[1] == "r" or piece[1] == "q":
+			dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+			for d_x, d_y in dirs:
+				new_pos = (x, y)
+				while True:
+					old_x, old_y = new_pos
+					new_pos = (old_x + d_x, old_y + d_y)
+					if self.is_valid(new_pos):
+						if self.is_empty(new_pos):
+							raw_moves.append(new_pos)
+						else:
+							if self.is_opposition_piece(new_pos, piece[0]):
+								raw_moves.append(new_pos)
+							break
+					else:
+						break
+		return raw_moves
+
 	def get_available_moves(self, pos):
 		# TODO: makes a state, passes to is_check() method, if no then adds to available_moves
 		x, y = pos
@@ -84,6 +155,15 @@ class Board:
 					available_moves[(x-1, y+1)] = True
 				if x < 7 and self.state[y+1][x+1] and self.state[y+1][x+1][0] == "w":
 					available_moves[(x+1, y+1)] = True
+		if piece[-1] == "k":
+			king_moves = [(1, 1), (0, 1), (-1, 1), (1, 0), (-1, 0), (1, -1), (0, -1), (-1, -1)]
+			for move in king_moves:
+				new_x, new_y = x + move[0], y + move[1]
+				if 0 <= new_x <= 7 and 0 <= new_y <= 7:
+					new_state = self.get_new_state((x, y), (new_x, new_y))
+					if self.state[new_y][new_x] == "" and not self.is_check(new_state, self.is_white_turn):
+						available_moves[(new_x, new_y)] = False
+
 		self.available_moves = available_moves
 		return available_moves
 
@@ -91,8 +171,10 @@ class Board:
 		if new_pos not in self.available_moves:
 			return
 		self.state = self.get_new_state(old_pos, new_pos)
-		# self.get_new_state(old_pos, new_pos)
+
 		self.is_white_turn = not self.is_white_turn
+		print("is check?")
+		self.is_check(self.state, self.is_white_turn)
 		self.available_moves = {}
 		self.selected_piece = None
 
@@ -105,26 +187,23 @@ class Board:
 		state[y_new][x_new] = piece
 		return state
 
-
-
-	def is_check(self, state=[], is_white=True):
+	def is_check(self, state, is_white):
 		"""
 		Checks if player is in check
 		:param state: state of board
 		:param is_white: if white is in check
 		:return: Boolean
 		"""
-		selected = self.selected_piece
-		state = state if state else self.state
 		colour = "w" if is_white else "b"
-		opp_king_pos = self.find_king_position(state, not is_white)
+		opp_king_pos = self.find_king_position(state, is_white)
 		for y, row in enumerate(state):
 			for x, piece in enumerate(row):
-				if piece and piece[0] == colour:
-					moves = self.get_available_moves((x, y))
-					if opp_king_pos in moves.keys():
+				if not self.is_empty((x, y)) and self.is_opposition_piece((x, y), colour):
+					moves = self.get_raw_moves((x, y))
+					if opp_king_pos in moves:
+						print("yes\n\n")
 						return True
-		self.selected_piece = selected
+		print("no\n\n")
 		return False
 
 	def find_king_position(self, state, is_white):
@@ -141,4 +220,16 @@ class Board:
 					return x, y
 		return None
 
-		return False
+	def is_valid(self, pos):
+		x, y = pos
+		return 0 <= x <= 7 and 0 <= y <= 7
+
+	def is_empty(self, pos):
+		x, y = pos
+		return self.state[y][x] == ""
+
+	def is_opposition_piece(self, pos, colour):
+		if self.is_empty(pos):
+			return False
+		x, y = pos
+		return self.state[y][x][0] != colour
