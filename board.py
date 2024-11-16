@@ -78,14 +78,14 @@ class Board:
 			king_moves = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
 			for move_x, move_y in king_moves:
 				new_pos = (x + move_x, y + move_y)
-				if self.is_valid(new_pos) and not self.is_opposition_piece(new_pos, piece[0]):
+				if self.is_valid(new_pos) and self.is_opposition_piece(new_pos, piece[0]):
 					raw_moves.append(new_pos)
 		# knight moves
 		if piece[1] == "n":
 			knight_moves = [(2, 1), (2, -1), (1, 2), (1, -2), (-2, 1), (-2, -1), (-1, 2), (-1, -2)]
 			for move_x, move_y in knight_moves:
 				new_pos = (x + move_x, y + move_y)
-				if self.is_valid(new_pos) and not self.is_opposition_piece(new_pos, piece[0]):
+				if self.is_valid(new_pos) and (self.is_opposition_piece(new_pos, piece[0]) or self.is_empty(new_pos)):
 					raw_moves.append(new_pos)
 		# bishop/queen moves
 		# TODO: repeat code. Could be more concise
@@ -125,44 +125,19 @@ class Board:
 		return raw_moves
 
 	def get_available_moves(self, pos):
-		# TODO: makes a state, passes to is_check() method, if no then adds to available_moves
+		# TODO: taking a piece that is checking a king is fine
 		x, y = pos
 		piece = self.state[y][x]
 		if not piece or (piece and (piece[0] == "w") != self.is_white_turn):
 			self.selected_piece = None
 			return {}
 		self.selected_piece = (x, y)
+		raw_moves = self.get_raw_moves(pos)
 		available_moves = {}
-# -=-=-=-=-=- WHITE PIECES -=-=-=-=-=-
-		if piece == "wp":
-			if y > 0 and not self.state[y-1][x]:
-				available_moves[(x, y-1)] = False
-				if y == 6 and not self.state[y-2][x]:
-					available_moves[(x, y-2)] = False
-			if y > 0:
-				if x > 0 and self.state[y-1][x-1] and self.state[y-1][x-1][0] == "b":
-					available_moves[(x-1, y-1)] = True
-				if x < 7 and self.state[y-1][x+1] and self.state[y-1][x+1][0] == "b":
-					available_moves[(x+1, y-1)] = True
-# -=-=-=-=-=- BLACK PIECES -=-=-=-=-=-
-		if piece == "bp":
-			if y < 7 and not self.state[y+1][x]:
-				available_moves[(x, y+1)] = False
-				if y == 1 and not self.state[y+2][x]:
-					available_moves[(x, y+2)] = False
-			if y < 7:
-				if x > 0 and self.state[y+1][x-1] and self.state[y+1][x-1][0] == "w":
-					available_moves[(x-1, y+1)] = True
-				if x < 7 and self.state[y+1][x+1] and self.state[y+1][x+1][0] == "w":
-					available_moves[(x+1, y+1)] = True
-		if piece[-1] == "k":
-			king_moves = [(1, 1), (0, 1), (-1, 1), (1, 0), (-1, 0), (1, -1), (0, -1), (-1, -1)]
-			for move in king_moves:
-				new_x, new_y = x + move[0], y + move[1]
-				if 0 <= new_x <= 7 and 0 <= new_y <= 7:
-					new_state = self.get_new_state((x, y), (new_x, new_y))
-					if self.state[new_y][new_x] == "" and not self.is_check(new_state, self.is_white_turn):
-						available_moves[(new_x, new_y)] = False
+		for move in raw_moves:
+			state = self.get_new_state(pos, move)
+			if not self.is_check(state, self.is_white_turn):
+				available_moves[move] = not self.is_empty(move)
 
 		self.available_moves = available_moves
 		return available_moves
