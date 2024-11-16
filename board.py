@@ -126,6 +126,7 @@ class Board:
 
 	def get_available_moves(self, pos):
 		# TODO: taking a piece that is checking a king is fine
+		# TODO: blocking check is fine
 		x, y = pos
 		piece = self.state[y][x]
 		if not piece or (piece and (piece[0] == "w") != self.is_white_turn):
