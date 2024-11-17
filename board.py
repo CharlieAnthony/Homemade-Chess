@@ -4,13 +4,13 @@ import pygame.draw
 class Board:
 	def __init__(self, screen):
 		self.state = [["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
-						["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
-						["", "", "", "", "", "", "", ""],
-						["", "", "", "", "", "", "", ""],
-						["", "", "", "", "", "", "", ""],
-						["", "", "", "", "", "", "", ""],
-						["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-						["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]]
+					  ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+					  ["", "", "", "", "", "", "", ""],
+					  ["", "", "", "", "", "", "", ""],
+					  ["", "", "", "", "", "", "", ""],
+					  ["", "", "", "", "", "", "", ""],
+					  ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+					  ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]]
 		self.available_moves = {}
 		self.square_size = 40
 		self.screen = screen
@@ -41,7 +41,8 @@ class Board:
 		if self.selected_piece:
 			for (x, y) in self.available_moves.keys():
 				x_pos, y_pos = self.x_offset + (x * self.square_size), self.y_offset + (y * self.square_size)
-				img = pygame.image.load("./assets/hint_danger.png" if self.available_moves[(x, y)] else "./assets/hint.png")
+				img = pygame.image.load(
+					"./assets/hint_danger.png" if self.available_moves[(x, y)] else "./assets/hint.png")
 				img_resized = pygame.transform.scale(img, (self.square_size, self.square_size))
 				self.screen.blit(img_resized, (x_pos, y_pos))
 
@@ -71,21 +72,24 @@ class Board:
 						raw_moves.append((x, y + (2 * direction)))
 			for x_dir in [-1, 1]:
 				capture_pos = (x + x_dir, y + direction)
-				if self.is_valid(capture_pos) and not self.is_empty(capture_pos) and self.is_opposition_piece(capture_pos, piece[0]):
+				if self.is_valid(capture_pos) and not self.is_empty(capture_pos) and self.is_opposition_piece(
+						self.state, capture_pos, piece[0]):
 					raw_moves.append(capture_pos)
 		# king moves
 		if piece[1] == "k":
 			king_moves = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
 			for move_x, move_y in king_moves:
 				new_pos = (x + move_x, y + move_y)
-				if self.is_valid(new_pos) and self.is_opposition_piece(new_pos, piece[0]):
+				if self.is_valid(new_pos) and (
+						self.is_empty(new_pos) or self.is_opposition_piece(self.state, new_pos, piece[0])):
 					raw_moves.append(new_pos)
 		# knight moves
 		if piece[1] == "n":
 			knight_moves = [(2, 1), (2, -1), (1, 2), (1, -2), (-2, 1), (-2, -1), (-1, 2), (-1, -2)]
 			for move_x, move_y in knight_moves:
 				new_pos = (x + move_x, y + move_y)
-				if self.is_valid(new_pos) and (self.is_opposition_piece(new_pos, piece[0]) or self.is_empty(new_pos)):
+				if self.is_valid(new_pos) and (
+						self.is_opposition_piece(self.state, new_pos, piece[0]) or self.is_empty(new_pos)):
 					raw_moves.append(new_pos)
 		# bishop/queen moves
 		# TODO: repeat code. Could be more concise
@@ -100,7 +104,7 @@ class Board:
 						if self.is_empty(new_pos):
 							raw_moves.append(new_pos)
 						else:
-							if self.is_opposition_piece(new_pos, piece[0]):
+							if self.is_opposition_piece(self.state, new_pos, piece[0]):
 								raw_moves.append(new_pos)
 							break
 					else:
@@ -117,7 +121,7 @@ class Board:
 						if self.is_empty(new_pos):
 							raw_moves.append(new_pos)
 						else:
-							if self.is_opposition_piece(new_pos, piece[0]):
+							if self.is_opposition_piece(self.state, new_pos, piece[0]):
 								raw_moves.append(new_pos)
 							break
 					else:
@@ -147,7 +151,6 @@ class Board:
 		if new_pos not in self.available_moves:
 			return
 		self.state = self.get_new_state(old_pos, new_pos)
-
 		self.is_white_turn = not self.is_white_turn
 		print("is check?")
 		self.is_check(self.state, self.is_white_turn)
@@ -174,7 +177,7 @@ class Board:
 		opp_king_pos = self.find_king_position(state, is_white)
 		for y, row in enumerate(state):
 			for x, piece in enumerate(row):
-				if not self.is_empty((x, y)) and self.is_opposition_piece((x, y), colour):
+				if state[y][x] != "" and self.is_opposition_piece(state, (x, y), colour):
 					moves = self.get_raw_moves((x, y))
 					if opp_king_pos in moves:
 						print("yes\n\n")
@@ -204,8 +207,8 @@ class Board:
 		x, y = pos
 		return self.state[y][x] == ""
 
-	def is_opposition_piece(self, pos, colour):
-		if self.is_empty(pos):
-			return False
+	def is_opposition_piece(self, state, pos, colour):
 		x, y = pos
-		return self.state[y][x][0] != colour
+		if state[y][x]:
+			return False
+		return state[y][x][0] != colour
