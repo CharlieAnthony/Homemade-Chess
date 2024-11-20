@@ -2,7 +2,7 @@ import pygame.draw
 
 
 class Board:
-	def __init__(self, screen):
+	def __init__(self, screen=None):
 		self.state = [["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
 					  ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
 					  ["", "", "", "", "", "", "", ""],
@@ -22,7 +22,8 @@ class Board:
 		self.can_black_castle = True
 		self.selected_piece = None
 
-		self.print_board()
+		if self.screen:
+			self.print_board()
 
 	def print_board(self):
 
