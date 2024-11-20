@@ -11,6 +11,8 @@ class Board:
 					  ["", "", "", "", "", "", "", ""],
 					  ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
 					  ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]]
+
+		# self.state =
 		self.available_moves = {}
 		self.square_size = 40
 		self.screen = screen
@@ -136,13 +138,19 @@ class Board:
 		if not piece or (piece and (piece[0] == "w") != self.is_white_turn):
 			self.selected_piece = None
 			return {}
-		self.selected_piece = (x, y)
+		self.selected_piece = pos
 		raw_moves = self.get_raw_moves(pos)
-		available_moves = {}
+		available_moves = {move: False for move in raw_moves}
+		# print(raw_moves)
 		for move in raw_moves:
 			state = self.get_new_state(pos, move)
+			# print(state)
 			if not self.is_check(state, self.is_white_turn):
+				# print("not check")
 				available_moves[move] = not self.is_empty(move)
+			else:
+				# print("potential check")
+				pass
 
 		self.available_moves = available_moves
 		return available_moves
@@ -152,7 +160,7 @@ class Board:
 			return
 		self.state = self.get_new_state(old_pos, new_pos)
 		self.is_white_turn = not self.is_white_turn
-		print("is check?")
+		# print("is check?")
 		self.is_check(self.state, self.is_white_turn)
 		self.available_moves = {}
 		self.selected_piece = None
@@ -174,15 +182,16 @@ class Board:
 		:return: Boolean
 		"""
 		colour = "w" if is_white else "b"
-		opp_king_pos = self.find_king_position(state, is_white)
+		king_pos = self.find_king_position(state, is_white)
 		for y, row in enumerate(state):
 			for x, piece in enumerate(row):
-				if state[y][x] != "" and self.is_opposition_piece(state, (x, y), colour):
-					moves = self.get_raw_moves((x, y))
-					if opp_king_pos in moves:
-						print("yes\n\n")
+				# if state[y][x] != "" and self.is_opposition_piece(state, (x, y), colour):
+				if state[y][x] != "" and piece[0] != colour:
+					raw_moves = self.get_raw_moves((x, y))
+					if king_pos in raw_moves:
+						# print("yes\n\n")
 						return True
-		print("no\n\n")
+		# print("no\n\n")
 		return False
 
 	def find_king_position(self, state, is_white):
@@ -209,6 +218,6 @@ class Board:
 
 	def is_opposition_piece(self, state, pos, colour):
 		x, y = pos
-		if state[y][x]:
+		if not state[y][x]:
 			return False
 		return state[y][x][0] != colour
