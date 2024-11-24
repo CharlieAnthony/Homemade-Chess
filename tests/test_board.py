@@ -77,8 +77,6 @@ def test_board_get_raw_moves(board):
     board.state[0][0] = "wn"
     available_moves = [(1, 2), (2, 1)]
     moves = board.get_raw_moves((0, 0))
-    print(available_moves)
-    print(moves)
     for move in available_moves:
         assert move in moves
         moves.pop(moves.index(move))
@@ -97,5 +95,14 @@ def test_board_get_new_state():
 def test_board_is_check():
     pass
 
-def test_board_find_king_position():
-    pass
+def test_board_find_king_position(board):
+    board.state = [["" for _ in range(8)] for _ in range(8)]
+    print(board.state)
+    positions = [(0, 0), (0, 3), (0, 7), (3, 0), (3, 3), (3, 7), (7, 0), (7, 3), (7, 7)]
+    colours = ["wk", "bk"]
+    for c in colours:
+        for pos in positions:
+            x, y = pos
+            board.state[y][x] = c
+            assert board.find_king_position(board.state, (c == "wk")) == pos
+            board.state[y][x] = ""
