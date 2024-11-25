@@ -57,9 +57,9 @@ class Board:
 		y = (y_pos - self.y_offset) // self.square_size
 		return x, y
 
-	def get_raw_moves(self, pos):
+	def get_raw_moves(self, state, pos):
 		x, y = pos
-		piece = self.state[y][x]
+		piece = state[y][x]
 		raw_moves = []
 		if not piece:
 			return []
@@ -76,7 +76,7 @@ class Board:
 			for x_dir in [-1, 1]:
 				capture_pos = (x + x_dir, y + direction)
 				if self.is_valid(capture_pos) and not self.is_empty(capture_pos) and self.is_opposition_piece(
-						self.state, capture_pos, piece[0]):
+						state, capture_pos, piece[0]):
 					raw_moves.append(capture_pos)
 		# king moves
 		if piece[1] == "k":
@@ -84,7 +84,7 @@ class Board:
 			for move_x, move_y in king_moves:
 				new_pos = (x + move_x, y + move_y)
 				if self.is_valid(new_pos) and (
-						self.is_empty(new_pos) or self.is_opposition_piece(self.state, new_pos, piece[0])):
+						self.is_empty(new_pos) or self.is_opposition_piece(state, new_pos, piece[0])):
 					raw_moves.append(new_pos)
 		# knight moves
 		if piece[1] == "n":
@@ -92,7 +92,7 @@ class Board:
 			for move_x, move_y in knight_moves:
 				new_pos = (x + move_x, y + move_y)
 				if self.is_valid(new_pos) and (
-						self.is_opposition_piece(self.state, new_pos, piece[0]) or self.is_empty(new_pos)):
+						self.is_opposition_piece(state, new_pos, piece[0]) or self.is_empty(new_pos)):
 					raw_moves.append(new_pos)
 		# bishop/queen moves
 		# TODO: repeat code. Could be more concise
@@ -107,7 +107,7 @@ class Board:
 						if self.is_empty(new_pos):
 							raw_moves.append(new_pos)
 						else:
-							if self.is_opposition_piece(self.state, new_pos, piece[0]):
+							if self.is_opposition_piece(state, new_pos, piece[0]):
 								raw_moves.append(new_pos)
 							break
 					else:
@@ -124,7 +124,7 @@ class Board:
 						if self.is_empty(new_pos):
 							raw_moves.append(new_pos)
 						else:
-							if self.is_opposition_piece(self.state, new_pos, piece[0]):
+							if self.is_opposition_piece(state, new_pos, piece[0]):
 								raw_moves.append(new_pos)
 							break
 					else:
@@ -187,11 +187,12 @@ class Board:
 		for y, row in enumerate(state):
 			for x, piece in enumerate(row):
 				# if state[y][x] != "" and self.is_opposition_piece(state, (x, y), colour):
-				if state[y][x] != "" and piece[0] != colour:
-					raw_moves = self.get_raw_moves((x, y))
-					if king_pos in raw_moves:
-						# print("yes\n\n")
-						return True
+				if piece != "":
+					if piece[0] != colour:
+						raw_moves = self.get_raw_moves(state, (x, y))
+						if king_pos in raw_moves:
+							# print("yes\n\n")
+							return True
 		# print("no\n\n")
 		return False
 
@@ -214,11 +215,12 @@ class Board:
 		return 0 <= x <= 7 and 0 <= y <= 7
 
 	def is_empty(self, pos):
+		# TODO: this is the problem
 		x, y = pos
 		return self.state[y][x] == ""
 
 	def is_opposition_piece(self, state, pos, colour):
 		x, y = pos
-		if not state[y][x]:
+		if not self.is_valid(pos):
 			return False
-		return state[y][x][0] != colour
+		return state[y][x] != "" and state[y][x][0] != colour
