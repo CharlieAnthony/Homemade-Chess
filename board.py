@@ -1,3 +1,5 @@
+from zoneinfo import available_timezones
+
 import pygame.draw
 
 
@@ -132,8 +134,6 @@ class Board:
 		return raw_moves
 
 	def get_available_moves(self, pos):
-		# TODO: taking a piece that is checking a king is fine
-		# TODO: blocking check is fine
 		x, y = pos
 		piece = self.state[y][x]
 		if not piece or (piece and (piece[0] == "w") != self.is_white_turn):
@@ -141,14 +141,15 @@ class Board:
 			return {}
 		self.selected_piece = pos
 		raw_moves = self.get_raw_moves(self.state, pos)
-		available_moves = {move: False for move in raw_moves}
+		# available_moves = {move: False for move in raw_moves}
+		available_moves = {}
 		# print(raw_moves)
 		for move in raw_moves:
 			state = self.get_new_state(pos, move)
 			# print(state)
 			if not self.is_check(state, self.is_white_turn):
 				# print("not check")
-				available_moves[move] = not self.is_empty(state, move)
+				available_moves[move] = not self.is_empty(self.state, move)
 			else:
 				# print("potential check")
 				pass
