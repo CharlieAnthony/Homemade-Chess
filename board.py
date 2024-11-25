@@ -68,14 +68,14 @@ class Board:
 			direction = 1 if piece[0] == "b" else -1
 			if not self.is_valid((x, y + direction)):
 				return []
-			if self.is_empty((x, y + direction)):
+			if self.is_empty(state, (x, y + direction)):
 				raw_moves.append((x, y + direction))
 				if (y == 6 and piece[0] == "w") or (y == 1 and piece[0] == "b"):
-					if self.is_empty((x, y + (2 * direction))):
+					if self.is_empty(state, (x, y + (2 * direction))):
 						raw_moves.append((x, y + (2 * direction)))
 			for x_dir in [-1, 1]:
 				capture_pos = (x + x_dir, y + direction)
-				if self.is_valid(capture_pos) and not self.is_empty(capture_pos) and self.is_opposition_piece(
+				if self.is_valid(capture_pos) and not self.is_empty(state, capture_pos) and self.is_opposition_piece(
 						state, capture_pos, piece[0]):
 					raw_moves.append(capture_pos)
 		# king moves
@@ -84,7 +84,7 @@ class Board:
 			for move_x, move_y in king_moves:
 				new_pos = (x + move_x, y + move_y)
 				if self.is_valid(new_pos) and (
-						self.is_empty(new_pos) or self.is_opposition_piece(state, new_pos, piece[0])):
+						self.is_empty(state, new_pos) or self.is_opposition_piece(state, new_pos, piece[0])):
 					raw_moves.append(new_pos)
 		# knight moves
 		if piece[1] == "n":
@@ -92,7 +92,7 @@ class Board:
 			for move_x, move_y in knight_moves:
 				new_pos = (x + move_x, y + move_y)
 				if self.is_valid(new_pos) and (
-						self.is_opposition_piece(state, new_pos, piece[0]) or self.is_empty(new_pos)):
+						self.is_opposition_piece(state, new_pos, piece[0]) or self.is_empty(state, new_pos)):
 					raw_moves.append(new_pos)
 		# bishop/queen moves
 		# TODO: repeat code. Could be more concise
@@ -104,7 +104,7 @@ class Board:
 					old_x, old_y = new_pos
 					new_pos = (old_x + d_x, old_y + d_y)
 					if self.is_valid(new_pos):
-						if self.is_empty(new_pos):
+						if self.is_empty(state, new_pos):
 							raw_moves.append(new_pos)
 						else:
 							if self.is_opposition_piece(state, new_pos, piece[0]):
@@ -121,7 +121,7 @@ class Board:
 					old_x, old_y = new_pos
 					new_pos = (old_x + d_x, old_y + d_y)
 					if self.is_valid(new_pos):
-						if self.is_empty(new_pos):
+						if self.is_empty(state, new_pos):
 							raw_moves.append(new_pos)
 						else:
 							if self.is_opposition_piece(state, new_pos, piece[0]):
@@ -140,7 +140,7 @@ class Board:
 			self.selected_piece = None
 			return {}
 		self.selected_piece = pos
-		raw_moves = self.get_raw_moves(pos)
+		raw_moves = self.get_raw_moves(self.state, pos)
 		available_moves = {move: False for move in raw_moves}
 		# print(raw_moves)
 		for move in raw_moves:
@@ -148,7 +148,7 @@ class Board:
 			# print(state)
 			if not self.is_check(state, self.is_white_turn):
 				# print("not check")
-				available_moves[move] = not self.is_empty(move)
+				available_moves[move] = not self.is_empty(state, move)
 			else:
 				# print("potential check")
 				pass
@@ -214,10 +214,9 @@ class Board:
 		x, y = pos
 		return 0 <= x <= 7 and 0 <= y <= 7
 
-	def is_empty(self, pos):
-		# TODO: this is the problem
+	def is_empty(self, state, pos):
 		x, y = pos
-		return self.state[y][x] == ""
+		return state[y][x] == ""
 
 	def is_opposition_piece(self, state, pos, colour):
 		x, y = pos

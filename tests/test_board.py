@@ -7,32 +7,32 @@ def board():
 
 def test_board_get_raw_moves(board):
 	# pawn moves
-	moves = board.get_raw_moves((0, 6))
+	moves = board.get_raw_moves( board.state, (0, 6))
 	assert (0, 5) in moves
 	assert (0, 4) in moves
 	board.state[5][0] = "wp"
-	assert board.get_raw_moves((0, 5)) == [(0, 4)]
+	assert board.get_raw_moves( board.state, (0, 5)) == [(0, 4)]
 
 	# king moves
 	board.state[6][4] = ""
-	moves = board.get_raw_moves((4, 7))
+	moves = board.get_raw_moves( board.state, (4, 7))
 	assert moves == [(4, 6)]
 	board.state[4][4] = "wk"
-	moves = board.get_raw_moves((4, 4))
+	moves = board.get_raw_moves( board.state, (4, 4))
 	available_moves = [(5, 5), (5, 4), (5, 3), (4, 5), (4, 3), (3, 5), (3, 4), (3, 3)]
 	for move in available_moves:
 		assert move in moves
 		moves.pop(moves.index(move))
 	assert len(moves) == 0
 	board.state[4][5] = "wp"
-	moves = board.get_raw_moves((4, 4))
+	moves = board.get_raw_moves( board.state, (4, 4))
 	available_moves = [(5, 5), (5, 3), (4, 5), (4, 3), (3, 5), (3, 4), (3, 3)]
 	for move in available_moves:
 		assert move in moves
 		moves.pop(moves.index(move))
 	assert len(moves) == 0
 	board.state[4][5] = "bp"
-	moves = board.get_raw_moves((4, 4))
+	moves = board.get_raw_moves( board.state, (4, 4))
 	available_moves = [(5, 5), (5, 4), (5, 3), (4, 5), (4, 3), (3, 5), (3, 4), (3, 3)]
 	for move in available_moves:
 		assert move in moves
@@ -49,7 +49,7 @@ def test_board_get_raw_moves(board):
 				   ["", "", "", "", "", "", "", ""],
 				   ["", "", "", "", "", "", "", ""]]
 	available_moves = [(1, 0), (2, 0), (3, 0), (1, 1), (2, 2), (3, 3), (0, 1), (0, 2), (0, 3)]
-	moves = board.get_raw_moves((0, 0))
+	moves = board.get_raw_moves(board.state, (0, 0))
 	for move in available_moves:
 		assert move in moves
 		moves.pop(moves.index(move))
@@ -58,7 +58,7 @@ def test_board_get_raw_moves(board):
 	# bishop moves
 	board.state[0][0] = "bb"
 	available_moves = [(1, 1), (2, 2), (3, 3)]
-	moves = board.get_raw_moves((0, 0))
+	moves = board.get_raw_moves(board.state, (0, 0))
 	for move in available_moves:
 		assert move in moves
 		moves.pop(moves.index(move))
@@ -67,7 +67,7 @@ def test_board_get_raw_moves(board):
 	# rook moves
 	board.state[0][0] = "br"
 	available_moves = [(1, 0), (2, 0), (3, 0), (0, 1), (0, 2), (0, 3)]
-	moves = board.get_raw_moves((0, 0))
+	moves = board.get_raw_moves(board.state, (0, 0))
 	for move in available_moves:
 		assert move in moves
 		moves.pop(moves.index(move))
@@ -76,7 +76,7 @@ def test_board_get_raw_moves(board):
 	# knight moves
 	board.state[0][0] = "wn"
 	available_moves = [(1, 2), (2, 1)]
-	moves = board.get_raw_moves((0, 0))
+	moves = board.get_raw_moves(board.state, (0, 0))
 	for move in available_moves:
 		assert move in moves
 		moves.pop(moves.index(move))
@@ -95,26 +95,26 @@ def test_board_get_new_state():
 def test_board_is_check(board):
 	# (test_state, is_white, is_check?)
 	test_cases = [
-		# (
-		# 	[["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
-		# 	 ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-		# 	 ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]], True, False
-		# ),
-		# (
-		# 	[["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
-		# 	 ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
-		# 	 ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-		# 	 ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]], False, False
-		# ),
+		(
+			[["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
+			 ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+			 ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]], True, False
+		),
+		(
+			[["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
+			 ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
+			 ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+			 ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]], False, False
+		),
 		(
 			[[""  , ""  , ""  , ""  , "bk", ""  , ""  , ""  ],
 			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
@@ -125,16 +125,16 @@ def test_board_is_check(board):
 			 [""  , ""  , ""  , ""  , ""  , ""  , ""  , ""  ],
 			 [""  , ""  , ""  , ""  , "wq"  , ""  , ""  , "" ]], False, True
 		),
-		# (
-		# 	[["", "", "", "", "wk", "", "", ""],
-		# 	 ["", "", "", "", "", "", "", ""],
-		# 	 ["", "", "", "", "", "", "", ""],
-		# 	 ["", "", "", "", "", "", "", ""],
-		# 	 ["", "", "", "", "", "", "", ""],
-		# 	 ["", "", "", "", "", "", "", ""],
-		# 	 ["", "", "", "", "", "", "", ""],
-		# 	 ["", "", "", "", "bq", "", "", ""]], True, True
-		# ),
+		(
+			[["", "", "", "", "wk", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "bq", "", "", ""]], True, True
+		),
 	]
 	for state, is_white, exp_res in test_cases:
 		assert board.is_check(state, is_white) == exp_res
