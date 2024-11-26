@@ -212,3 +212,23 @@ class Board:
 		if not self.is_valid(pos):
 			return False
 		return state[y][x] != "" and state[y][x][0] != colour
+
+	def is_game_over(self):
+		white_moves = []
+		black_moves = []
+		original_white_turn = True if self.is_white_turn else False
+		for y, row in enumerate(self.state):
+			for x, piece in enumerate(row):
+				pos = (x, y)
+				if not self.is_empty(self.state, pos):
+					self.is_white_turn = piece[0] == "w"
+					vals = [keys for keys in self.get_available_moves(pos).keys()]
+					if piece[0] == "w" and len(vals) > 0:
+						white_moves.append(vals)
+					elif piece[0] == "b" and len(vals) > 0:
+						black_moves.append(vals)
+				if len(white_moves) > 0 and len(black_moves) > 0:
+					return False
+		self.selected_piece = None
+		self.is_white_turn = original_white_turn
+		return len(white_moves) == 0 or len(black_moves) == 0

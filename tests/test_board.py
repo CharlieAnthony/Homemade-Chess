@@ -82,7 +82,6 @@ def test_board_get_raw_moves(board):
 		moves.pop(moves.index(move))
 	assert len(moves) == 0
 
-
 def test_board_get_available_moves():
 	pass
 
@@ -370,3 +369,32 @@ def test_board_find_king_position(board):
 			board.state[y][x] = c
 			assert board.find_king_position(board.state, (c == "wk")) == pos
 			board.state[y][x] = ""
+
+def test_is_game_over(board):
+	test_cases = [
+		(
+			[["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
+			 ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+			 ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]],
+			False
+		),
+		(
+			[["", "", "", "", "bk", "", "", "wr"],
+			 ["", "", "", "", "", "", "", "wr"],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "", "", "", ""],
+			 ["", "", "", "", "wk", "", "", ""]],
+			 True
+		),
+	]
+	for test, exp_res in test_cases:
+		board.state = test
+		assert board.is_game_over() == exp_res

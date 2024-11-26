@@ -35,6 +35,8 @@ class Chess_Game:
 					x, y = board.get_clicked_cell((x_pixel, y_pixel))
 					if board.selected_piece and (x, y) in board.available_moves.keys():
 						board.move_piece(board.selected_piece, (x, y))
+						if board.is_game_over():
+							print("game over !")
 					else:
 						board.get_available_moves((x, y))
 					board.print_board()
