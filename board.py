@@ -96,27 +96,13 @@ class Board:
 				if self.is_valid(new_pos) and (
 						self.is_opposition_piece(state, new_pos, piece[0]) or self.is_empty(state, new_pos)):
 					raw_moves.append(new_pos)
-		# bishop/queen moves
-		# TODO: repeat code. Could be more concise
-		if piece[1] == "b" or piece[1] == "q":
-			dirs = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
-			for d_x, d_y in dirs:
-				new_pos = (x, y)
-				while True:
-					old_x, old_y = new_pos
-					new_pos = (old_x + d_x, old_y + d_y)
-					if self.is_valid(new_pos):
-						if self.is_empty(state, new_pos):
-							raw_moves.append(new_pos)
-						else:
-							if self.is_opposition_piece(state, new_pos, piece[0]):
-								raw_moves.append(new_pos)
-							break
-					else:
-						break
-		# rook/queen moves
-		if piece[1] == "r" or piece[1] == "q":
-			dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+		# bishop/rook/queen moves
+		if piece[1] in ["b", "r", "q"]:
+			dirs = []
+			if piece[1] in ["b", "q"]:
+				dirs.extend([(1, 1), (1, -1), (-1, 1), (-1, -1)])
+			if piece[1] in ["r", "q"]:
+				dirs.extend([(0, 1), (0, -1), (1, 0), (-1, 0)])
 			for d_x, d_y in dirs:
 				new_pos = (x, y)
 				while True:
