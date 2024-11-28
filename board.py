@@ -140,7 +140,7 @@ class Board:
 			return
 		self.state = self.get_new_state(old_pos, new_pos)
 		self.is_white_turn = not self.is_white_turn
-		self.is_check(self.state, self.is_white_turn)
+		# self.is_check(self.state, self.is_white_turn)
 		self.available_moves = {}
 		self.selected_piece = None
 
@@ -202,6 +202,7 @@ class Board:
 	def is_game_over(self):
 		white_moves = []
 		black_moves = []
+		print("og: ", "white" if self.is_white_turn else "black")
 		original_white_turn = True if self.is_white_turn else False
 		for y, row in enumerate(self.state):
 			for x, piece in enumerate(row):
@@ -214,7 +215,12 @@ class Board:
 					elif piece[0] == "b" and len(vals) > 0:
 						black_moves.append(vals)
 				if len(white_moves) > 0 and len(black_moves) > 0:
+					self.is_white_turn = original_white_turn
+					self.available_moves = {}
+					print("after: ", "white" if self.is_white_turn else "black")
 					return False
 		self.selected_piece = None
+		self.available_moves = {}
 		self.is_white_turn = original_white_turn
+		print("after: ", "white" if self.is_white_turn else "black")
 		return len(white_moves) == 0 or len(black_moves) == 0
