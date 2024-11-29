@@ -4,14 +4,18 @@ from board import Board
 class Chess_Game:
 
 	def __init__(self):
-		screen_width = 400
-		screen_height = 400
+		screen_width = 420
+		screen_height = 420
 
 		self.running = True
 
 		pygame.display.init()
 
 		self.screen = pygame.display.set_mode([screen_width, screen_height])
+
+		colour = (48, 46, 43)
+
+		self.screen.fill(colour)
 
 		window_title = "Chess"
 
@@ -36,7 +40,7 @@ class Chess_Game:
 					if board.selected_piece and (x, y) in board.available_moves.keys():
 						board.move_piece(board.selected_piece, (x, y))
 						if board.is_game_over():
-							print("game over !")
+							board.game_over = True
 					else:
 						board.get_available_moves((x, y))
 					board.print_board()

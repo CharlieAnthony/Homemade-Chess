@@ -14,15 +14,15 @@ class Board:
 					  ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
 					  ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]]
 
-		# self.state =
 		self.available_moves = {}
 		self.square_size = 40
 		self.screen = screen
-		self.x_offset, self.y_offset = 30, 30
+		self.x_offset, self.y_offset = 50, 50
 		self.is_white_turn = True
 		self.can_white_castle = True
 		self.can_black_castle = True
 		self.selected_piece = None
+		self.game_over = False
 
 		if self.screen:
 			self.print_board()
@@ -58,6 +58,10 @@ class Board:
 		x = (x_pos - self.x_offset) // self.square_size
 		y = (y_pos - self.y_offset) // self.square_size
 		return x, y
+
+# TODO: add special moves
+# 	- en passant
+# 	- castling
 
 	def get_raw_moves(self, state, pos):
 		x, y = pos
@@ -140,7 +144,6 @@ class Board:
 			return
 		self.state = self.get_new_state(old_pos, new_pos)
 		self.is_white_turn = not self.is_white_turn
-		# self.is_check(self.state, self.is_white_turn)
 		self.available_moves = {}
 		self.selected_piece = None
 
